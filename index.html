@@ -1,35 +1,73 @@
-<script>
-    const supabaseUrl = 'https://mxihevjdzgputromshkq.supabase.co';
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Авторизация через GitHub</title>
+</head>
+<body>
+
+    <button id="login">Войти через GitHub</button>
+    <button id="logout" style="display: none;">Выйти</button>
+
+    <!-- Подключаем Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        const supabaseUrl = 'https://mxihevjdzgputromshkq.supabase.co';
     const supabaseKey = 'sb_publishable_LyD9r_1a5mUlVjQN8_n3Hg_nI2aT4Tx';
-    const client = supabase.createClient(supabaseUrl, supabaseKey);
 
-      async function signInWithGithub() {
-        const { data, error } = await client.auth.signInWithOAuth({
-          provider: 'github',
-          options: {
-            redirectTo: 'https://github.com/antonssaaa/Anton-Kulikov-2.git',
-          },
-        });
-      }
-      document
-        .querySelector('#login')
-        .addEventListener('click', signInWithGithub);
+        const { createClient } = supabase;
 
-      async function checkLogin() {
-        const authInfo = await client.auth.getSession();
-        const session = authInfo.data.session;
-        document.querySelector('#login').style.display = 'none';
-        document.querySelector('#logout').style.display = 'none';
-        if (session === null) {
-          document.querySelector('#login').style.display = 'inline';
-        } else {
-          document.querySelector('#logout').style.display = 'inline';
+        const client = createClient(supabaseUrl, supabaseKey);
+
+        async function signInWithGithub() {
+            const { data, error } = await client.auth.signInWithOAuth({
+                provider: 'github',
+                options: {
+                    redirectTo: 'ТВОЯ_ССЫЛКА'
+                }
+            });
+
+            if (error) {
+                console.error(error.message);
+            }
         }
-      }
-      checkLogin();
-      async function signOut() {
-        const { error } = await client.auth.signOut();
+
+        document.querySelector('#login')
+            .addEventListener('click', signInWithGithub);
+
+        async function checkLogin() {
+            const { data, error } = await client.auth.getSession();
+
+            if (error) {
+                console.error(error.message);
+                return;
+            }
+
+            const session = data.session;
+
+            document.querySelector('#login').style.display =
+                session ? 'none' : 'inline';
+
+            document.querySelector('#logout').style.display =
+                session ? 'inline' : 'none';
+        }
+
+        async function signOut() {
+            const { error } = await client.auth.signOut();
+
+            if (error) {
+                console.error(error.message);
+            }
+
+            await checkLogin();
+        }
+
+        document.querySelector('#logout')
+            .addEventListener('click', signOut);
+
         checkLogin();
-      }
-      document.querySelector('#logout').addEventListener('click', signOut);
-</script>
+    </script>
+
+</body>
+</html>
